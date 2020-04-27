@@ -12,6 +12,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:wangstock/product_model.dart';
 import 'package:wangstock/product_detail.dart';
+import 'package:wangstock/home.dart';
 
 class AddProductPage extends StatefulWidget {
   @override
@@ -27,6 +28,7 @@ class _AddProductPageState extends State<AddProductPage> {
   Soundpool _soundpool = Soundpool();
 
   List<Product> _product = [];
+  var empCodeStock;
 
   @override
   void initState() {
@@ -85,31 +87,75 @@ class _AddProductPageState extends State<AddProductPage> {
     await _soundpool.play(_alarmSound);
   }
 
-  /*scanBarcode() async {
-    FlutterBarcodeScanner.getBarcodeStreamReceiver("#ff6666", "Cancel", true, ScanMode.DEFAULT)
-        .listen((barcode) {
+  _addCheckStockProductList(productVal) async{
 
-      if(barcode != '-1'){
+    if(productVal != null) {
 
-        /// barcode to be used
-        print('barcode val $barcode');
-        searchProduct(barcode);
-        Future.delayed(Duration(seconds: 1), () {
-          print(_product[0]);
-          //addToOrderFast(_product[0]);
-        });
+      var uri = Uri.parse("https://wangpharma.com/API/checkStockProduct.php");
+      var request = http.MultipartRequest("POST", uri);
 
-        //playBeepSound();
-        _playSound();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      empCodeStock = prefs.getString("empCodeStock");
 
-        //SystemSound.play(SystemSoundType.click);
-        //scanBarcode();
-      }else{
-        showToastVal('ไม่พบสินค้า');
+      //request.fields['ct_code'] = ;
+      request.fields['act'] = 'AddList';
+      request.fields['ctl_pcode'] = productVal.productCode;
+      request.fields['ctl_stock'] = productVal.productStockQ;
+      request.fields['Emp_Code'] = empCodeStock;
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+
+        var respStr = await response.stream.bytesToString();
+
+        print("add OK");
+        print(respStr);
+
+        showToastAddFast();
+        Navigator.of(context).pushNamedAndRemoveUntil('/Home', (Route<dynamic> route) => false);
+
+        /*Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => Home())).then((r){
+        });*/
+
+        //Navigator.pop(context);
+
+      } else {
+        print("add Error");
       }
 
-    });
-  }*/
+      showToastAddFast();
+      //Navigator.of(context).pushNamedAndRemoveUntil('/Home', (Route<dynamic> route) => false);
+      //Navigator.pop(context);
+
+    }else{
+      _showAlert();
+    }
+  }
+
+  showToastAddFast(){
+    Fluttertoast.showToast(
+        msg: "เพิ่มรายการแล้ว",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 3
+    );
+  }
+
+  _showAlert() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('แจ้งเตือน'),
+          content: Text('คุณกรอกรายละเอียดไม่ครบถ้วน'),
+        );
+      },
+    );
+  }
 
   scanBarcode() async {
     try {
@@ -170,9 +216,9 @@ class _AddProductPageState extends State<AddProductPage> {
             return ListTile(
               contentPadding: EdgeInsets.fromLTRB(10, 1, 10, 1),
               onTap: (){
-                Navigator.push(
+                /*Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => ProductDetailPage(productsVal: a)));
+                    MaterialPageRoute(builder: (context) => ProductDetailPage(productsVal: a)));*/
               },
               leading: Image.network('https://www.wangpharma.com/cms/product/${a.productPic}', fit: BoxFit.cover, width: 70, height: 70),
               title: Text('${a.productName}', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
@@ -186,10 +232,11 @@ class _AddProductPageState extends State<AddProductPage> {
               trailing: IconButton(
                   icon: Icon(Icons.add_circle, color: Colors.teal, size: 40,),
                   onPressed: (){
-                    //addToOrderFast(a);
-                    Navigator.push(
+                    _addCheckStockProductList(a);
+
+                    /*Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => ProductDetailPage(productsVal: a)));
+                        MaterialPageRoute(builder: (context) => ProductDetailPage(productsVal: a)));*/
                   }
               ),
             );
