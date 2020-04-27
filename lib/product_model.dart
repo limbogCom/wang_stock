@@ -23,6 +23,7 @@ class Product{
   final String productDetail;
   final String productHowTo;
   final String productProLimit;//add comment limit order
+  final String productStockQ;
 
   Product({
     this.productId,
@@ -48,7 +49,8 @@ class Product{
     this.productProperties,
     this.productDetail,
     this.productHowTo,
-    this.productProLimit
+    this.productProLimit,
+    this.productStockQ
   });
 
   factory Product.fromJson(Map<String, dynamic> json){
@@ -77,6 +79,7 @@ class Product{
       productDetail: json['detail'],
       productHowTo: json['howTo'],
       productProLimit: json['limit1'],
+      productStockQ: json['stockQ'],
     );
   }
 }
