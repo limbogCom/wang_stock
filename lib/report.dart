@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wangstock/count_stock_model.dart';
+import 'package:wangstock/product_detail.dart';
+import 'package:wangstock/report_detail.dart';
 
 class ReportPage extends StatefulWidget {
   @override
@@ -14,6 +17,8 @@ class _ReportPageState extends State<ReportPage> {
 
   ScrollController _scrollController = new ScrollController();
 
+  var refreshKey = GlobalKey<RefreshIndicatorState>();
+
   //Product product;
   List <CountStock>productAll = [];
   bool isLoading = true;
@@ -23,6 +28,7 @@ class _ReportPageState extends State<ReportPage> {
   getCountStockProduct() async{
 
     final res = await http.get('https://wangpharma.com/API/checkStockProduct.php?PerPage=$perPage&act=$act');
+    //print('https://wangpharma.com/API/checkStockProduct.php?PerPage=$perPage&act=$act');
 
     if(res.statusCode == 200){
 
@@ -61,50 +67,67 @@ class _ReportPageState extends State<ReportPage> {
     });
   }
 
+  Future<Null> refreshList() async {
+    refreshKey.currentState?.show(atTop: false);
+    await Future.delayed(Duration(seconds: 2));
+
+    setState(() {
+      getCountStockProduct();
+    });
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: isLoading ? CircularProgressIndicator()
-          :ListView.separated(
-        separatorBuilder: (BuildContext context, int index) => Divider(),
-        controller: _scrollController,
-        itemBuilder: (context, int index){
-          return ListTile(
-            contentPadding: EdgeInsets.fromLTRB(10, 1, 10, 1),
-            onTap: (){
-              /*Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => ReportDetailPage(receiveProducts: productAll[index])));*/
-            },
-            leading: Image.network('https://www.wangpharma.com/cms/product/${productAll[index].countStockProdPic}', fit: BoxFit.cover, width: 70, height: 70,),
-            title: Text('${productAll[index].countStockProdName}', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text('${productAll[index].countStockProdCode}'),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Text('${productAll[index].countStockBalance} : ${productAll[index].countStockProdUnit1}', style: TextStyle(color: Colors.red),),
-                    Text('พนง.เปิด ${productAll[index].countStockEmpAdd}', style: TextStyle(color: Colors.green),),
-                  ],
-                ),
-                Text('เปิดงาน ${productAll[index].countStockDateAdd}', style: TextStyle(color: Colors.blueGrey),),
-                //productAll[index].recevicProductUnitNew == null
-                    //? Text('หน่วยย่อย : ${productAll[index].recevicTCqtySub} ${productAll[index].recevicProductUnit}', style: TextStyle(color: Colors.lightBlue))
-                    //: Text('หน่วยย่อย : ${productAll[index].recevicTCqtySub} ${productAll[index].recevicProductUnitNew}', style: TextStyle(color: Colors.lightBlue)),
-              ],
+          :RefreshIndicator(
+            key: refreshKey,
+            child: ListView.separated(
+              separatorBuilder: (BuildContext context, int index) => Divider(),
+              controller: _scrollController,
+              itemBuilder: (context, int index){
+                return ListTile(
+                  contentPadding: EdgeInsets.fromLTRB(10, 1, 10, 1),
+                  onTap: (){
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => ProductDetailPage(productsVal: productAll[index])));
+                  },
+                  leading: Image.network('https://www.wangpharma.com/cms/product/${productAll[index].countStockProdPic}', fit: BoxFit.cover, width: 70, height: 70,),
+                  title: Text('${productAll[index].countStockProdName}', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold), overflow: TextOverflow.ellipsis),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          Text('${productAll[index].countStockProdCode}'),
+                          Text('พนง.เปิด ${productAll[index].countStockEmpAdd}', style: TextStyle(color: Colors.green),),
+                        ],
+                      ),
+                      Text('นับล่าสุด ${productAll[index].countStockNumCount} : ${productAll[index].countStockProdUnit1}', style: TextStyle(color: Colors.red),),
+                      Text('เปิดงาน ${productAll[index].countStockDateAdd}', style: TextStyle(color: Colors.blueGrey),),
+                      //productAll[index].recevicProductUnitNew == null
+                      //? Text('หน่วยย่อย : ${productAll[index].recevicTCqtySub} ${productAll[index].recevicProductUnit}', style: TextStyle(color: Colors.lightBlue))
+                      //: Text('หน่วยย่อย : ${productAll[index].recevicTCqtySub} ${productAll[index].recevicProductUnitNew}', style: TextStyle(color: Colors.lightBlue)),
+                    ],
+                  ),
+                  trailing: IconButton(
+                      icon: Icon(Icons.list, size: 40,),
+                      onPressed: (){
+                        //addToOrderFast(productAll[index]);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => ReportDetailPage(productsVal: productAll[index])));
+                      }
+                  ),
+                );
+              },
+              itemCount: productAll != null ? productAll.length : 0,
             ),
-
-            /*trailing: IconButton(
-                icon: Icon(Icons.view_list, size: 40,),
-                onPressed: (){
-                  //addToOrderFast(productAll[index]);
-                }
-            ),*/
-          );
-        },
-        itemCount: productAll != null ? productAll.length : 0,
+            onRefresh: refreshList,
       ),
     );
   }
