@@ -5,6 +5,7 @@ class CountStock{
   final String countStockProdName;
   final String countStockProdPic;
   final String countStockProdUnit1;
+  final String countStockProdStockQ;
   final String countStockBalance;
   final String countStockDateAdd;
   final String countStockEmpAdd;
@@ -27,6 +28,7 @@ class CountStock{
     this.countStockProdName,
     this.countStockProdPic,
     this.countStockProdUnit1,
+    this.countStockProdStockQ,
     this.countStockBalance,
     this.countStockDateAdd,
     this.countStockEmpAdd,
@@ -51,6 +53,7 @@ class CountStock{
       countStockProdName: json['nproduct'],
       countStockProdPic: json['pic'],
       countStockProdUnit1: json['unit1'],
+      countStockProdStockQ: json['stockQ'],
       countStockBalance: json['ctl_stock'],
       countStockDateAdd: json['ctl_dateadd'],
       countStockEmpAdd: json['ctl_empadd'],
