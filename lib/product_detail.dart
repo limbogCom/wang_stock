@@ -35,11 +35,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     });
   }
 
-  _addReceiveProduct() async{
+  _updateCountProduct() async{
 
     if(valAmount.text != '') {
 
-      /*var uri = Uri.parse("https://wangpharma.com/API/addReceiveProduct.php");
+      var uri = Uri.parse("https://wangpharma.com/API/checkStockProduct.php");
       var request = http.MultipartRequest("POST", uri);
 
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -47,7 +47,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
 
       //request.fields['ct_code'] = ;
-      request.fields['ctl_pcode'] = widget.productsVal.productCode;
+      request.fields['act'] = 'AddNumStock';
+      request.fields['ctl_pcode'] = widget.productsVal.countStockProdCode;
       request.fields['count_amount'] = valAmount.text;
       request.fields['count_unit'] = _currentUnit;
       request.fields['emp_pickingorder'] = empCodeStock;
@@ -74,11 +75,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
       } else {
         print("add Error");
-      }*/
-
-      showToastAddFast();
-
-      Navigator.pop(context);
+      }
 
     }else{
       _showAlert();
@@ -112,21 +109,21 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
 
     units = [];
 
-    if(widget.productsVal.productUnit1.toString() != "null"){
-      units.add(widget.productsVal.productUnit1.toString());
+    if(widget.productsVal.countStockProdUnit1.toString() != "null"){
+      units.add(widget.productsVal.countStockProdUnit1.toString());
       //setState(() {
       //_currentUnit = widget.product['unit1'].toString();
       //});
     }
-    if(widget.productsVal.productUnit2.toString() != "null"){
-      units.add(widget.productsVal.productUnit2.toString());
+    if(widget.productsVal.countStockProdUnit2.toString() != "null"){
+      units.add(widget.productsVal.countStockProdUnit2.toString());
     }
-    if(widget.productsVal.productUnit3.toString() != "null"){
-      units.add(widget.productsVal.productUnit3.toString());
+    if(widget.productsVal.countStockProdUnit3.toString() != "null"){
+      units.add(widget.productsVal.countStockProdUnit3.toString());
     }
 
     if(_currentUnit == null){
-      _currentUnit = widget.productsVal.productUnit1.toString();
+      _currentUnit = widget.productsVal.countStockProdUnit1.toString();
     }
 
     return Scaffold(
@@ -148,10 +145,10 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             child: Column(
               //crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text(widget.productsVal.productCode, style: TextStyle(fontSize: 20)),
-                Text(widget.productsVal.productName, style: TextStyle(fontSize: 18), overflow: TextOverflow.ellipsis,),
+                Text('Code : ${widget.productsVal.countStockProdCode}', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Text('Name : ${widget.productsVal.countStockProdName}', style: TextStyle(fontSize: 16)),
                 Container(
-                  child: Image.network('https://www.wangpharma.com/cms/product/${widget.productsVal.productPic}', fit: BoxFit.cover, width: 300),
+                  child: Image.network('https://www.wangpharma.com/cms/product/${widget.productsVal.countStockProdPic}', fit: BoxFit.cover, width: 350, height: 350,),
                 ),
                 SizedBox(
                   height: 20,
@@ -212,7 +209,6 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ],
                 ),
                 TextField(
-                  maxLength: 2,
                   controller: valComment,
                   decoration: InputDecoration(
                       labelText: "หมายเหตุ"
@@ -225,7 +221,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     height: 56,
                     child: RaisedButton (
                       color: Colors.green,
-                      onPressed: _addReceiveProduct,
+                      onPressed: _updateCountProduct,
                       child: Text (
                         'ส่งยอด',
                         style: TextStyle (
