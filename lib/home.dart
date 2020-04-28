@@ -6,8 +6,6 @@ import 'package:wangstock/add_product.dart';
 import 'package:wangstock/report.dart';
 import 'package:wangstock/user.dart';
 
-import 'package:url_launcher/url_launcher.dart';
-
 class Home extends StatefulWidget {
   @override
   _HomeState createState() => _HomeState();
@@ -33,15 +31,6 @@ class _HomeState extends State<Home> {
     // TODO: implement initState
     super.initState();
     getCodeEmpReceive();
-  }
-
-  _launchURL() async {
-    const url = 'http://wangpharma.com/wang/warehouse-add-countstock.php';
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      throw 'Could not launch $url';
-    }
   }
 
   @override
@@ -79,13 +68,7 @@ class _HomeState extends State<Home> {
         backgroundColor: Colors.green,
         title: Text("ระบบนับสินค้า-$username"),
         actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.cast_connected, size: 40, color: Colors.white,),
-            color: Colors.black,
-            onPressed: (){
-              _launchURL();
-            },
-          ),
+
         ],
       ),
       body: pages[currentIndex],

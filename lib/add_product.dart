@@ -164,12 +164,7 @@ class _AddProductPageState extends State<AddProductPage> {
       setState((){
         //this.barcode = barcode.rawContent;
         //print('999999999999${barcode.rawContent}');
-        if(barcode.rawContent.isNotEmpty){
-          searchProduct(barcode.rawContent);
-        }else{
-          showToastVal('ไม่พบสินค้า');
-        }
-
+        searchProduct(barcode.rawContent);
       });
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.cameraAccessDenied) {
