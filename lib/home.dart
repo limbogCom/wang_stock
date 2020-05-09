@@ -80,6 +80,7 @@ class _HomeState extends State<Home> {
         title: Text("ระบบนับสินค้า-$username"),
         actions: <Widget>[
           IconButton(
+            padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
             icon: Icon(Icons.cast_connected, size: 40, color: Colors.white,),
             color: Colors.black,
             onPressed: (){
