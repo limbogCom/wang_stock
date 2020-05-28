@@ -21,6 +21,8 @@ class AddProductPage extends StatefulWidget {
 
 class _AddProductPageState extends State<AddProductPage> {
 
+  TextEditingController barcodeProduct = TextEditingController();
+
   var loading = false;
 
   //Sound scan barcode
@@ -28,6 +30,7 @@ class _AddProductPageState extends State<AddProductPage> {
   Soundpool _soundpool = Soundpool();
 
   List<Product> _product = [];
+  List<Product> _search = [];
   var empCodeStock;
 
   @override
@@ -38,13 +41,30 @@ class _AddProductPageState extends State<AddProductPage> {
 
   }
 
+  onSearch(String text) async{
+    _search.clear();
+    if(text.isEmpty){
+      setState(() {});
+      return;
+    }
+
+    setState(() {
+      searchProduct(text);
+    });
+    /*_product.forEach((f){
+      if(f.productName.contains(text)) _search.add(f);
+    });*/
+
+    //setState(() {});
+  }
+
   searchProduct(searchVal) async{
 
     _product.clear();
 
     //productAll = [];
 
-    final res = await http.get('https://wangpharma.com/API/product.php?SearchVal=$searchVal&act=Search');
+    final res = await http.get('https://wangpharma.com/API/receiveProduct.php?SearchVal=$searchVal&act=Search');
 
     if(res.statusCode == 200){
 
@@ -164,7 +184,12 @@ class _AddProductPageState extends State<AddProductPage> {
       setState((){
         //this.barcode = barcode.rawContent;
         //print('999999999999${barcode.rawContent}');
-        searchProduct(barcode.rawContent);
+        if(barcode.rawContent.isNotEmpty){
+          searchProduct(barcode.rawContent);
+        }else{
+          showToastVal('ไม่พบสินค้า');
+        }
+
       });
     } on PlatformException catch (e) {
       if (e.code == BarcodeScanner.cameraAccessDenied) {
@@ -249,30 +274,50 @@ class _AddProductPageState extends State<AddProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        child: Column(
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
-              child: SizedBox (
-                width: double.infinity,
-                height: 56,
-                child: RaisedButton (
-                  color: Colors.red,
-                  onPressed: scanBarcode,
-                  child: Text (
-                    'Scan',
-                    style: TextStyle (
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 30,
+      body: SingleChildScrollView(
+        child: Container(
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.fromLTRB(25, 0, 10, 0),
+                child: TextField (
+                  controller: barcodeProduct,
+                  onChanged: onSearch,
+                  style: TextStyle (
+                    fontSize: 18,
+                    color: Colors.black,
+                  ),
+                  decoration: InputDecoration (
+                      labelText: 'Barcode / Code สินค้า',
+                      labelStyle: TextStyle (
+                        fontSize: (15),
+                      )
+                  ),
+                  keyboardType: TextInputType.text,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.fromLTRB(10, 20, 10, 10),
+                child: SizedBox (
+                  width: double.infinity,
+                  height: 56,
+                  child: RaisedButton (
+                    color: Colors.red,
+                    onPressed: scanBarcode,
+                    child: Text (
+                      'Scan',
+                      style: TextStyle (
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            _getProductInfo(),
-          ],
+              _getProductInfo(),
+            ],
+          ),
         ),
       ),
     );
